@@ -33,7 +33,7 @@ GitLab MR Opened
 │                                                          │
 │  [1] Context Engine ──RAG──▶ VectorStore                 │
 │       ↓                                                  │
-│  [2] Security Auditor ──Regex+Claude+OSV──▶ Findings     │
+│  [2] Security Auditor ──Claude+Gemini+OSV──▶ Consensus   │
 │       ↓                                                  │
 │  [3] Docs Guardian ──Claude──▶ Wiki Auto-Update          │
 │       ↓                                                  │
@@ -54,7 +54,7 @@ GitLab MR Opened
 | Agent | Role | Key Action |
 |-------|------|------------|
 | 🧠 Context Engine | RAG system | Embeds MR diff, wiki, issues into vector store |
-| 🔐 Security Auditor | 3-layer security scan | Regex + Claude + OSV CVE check |
+| 🔐 Security Auditor | Dual-AI Consensus | Teams up **Claude 3.7 Sonnet** & **Gemini 2.0 Flash** to independently audit code. Only vulnerabilities agreed upon by both models (consensus) and verified against the OSV CVE database are flagged, eliminating AI hallucinations! |
 | 📚 Docs Guardian | Documentation health | Auto-updates GitLab Wiki when code breaks docs |
 | 📊 Risk Scorer | Risk quantification | Weighted 0-100 score → auto-approve/block |
 | 🌱 Green Sentinel | Environmental impact | Tracks compute + CO₂ savings per scan |
@@ -67,19 +67,32 @@ GitLab MR Opened
 - ✅ **Google Cloud Bonus ($10,000)** — Deployed natively on Google Cloud Run (2nd Gen) via Firebase Functions for stateless, auto-scaling multi-tenant orchestration.
 - ✅ **Green Agent Bonus ($3,000)** — Green Agent: reduces unnecessary pipeline compute through early issue detection
 
-## Setup & Installation
+## 🚀 How to Try It (Recommended)
+
+FluxSentinel AI is a fully deployed, multi-tenant SaaS application running on Google Cloud Run. **You do not need to install anything or run code locally to test it.**
+
+1. Visit the Live Dashboard: **[https://api-urtl66e5lq-uc.a.run.app/login](https://api-urtl66e5lq-uc.a.run.app/login)**
+2. Enter any email and password to instantly create your secure tenant profile.
+3. Follow the 3-step magic **Setup Wizard** to securely connect your GitLab account.
+4. Open a Merge Request in GitLab — and watch the AI agents take over entirely autonomously!
+
+---
+
+## 💻 Developer Setup & Self-Hosting
+
+If you want to run the orbital orchestration engine locally on your own machine instead of using the live SaaS:
 
 ### Prerequisites
 - Node.js 20+
 - GitLab account with admin access to a project
-- Anthropic API key
+- Anthropic API key & Gemini API key
 - Resend API key (for email)
 
-### Quick Start
+### Local Quick Start
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/yourname/fluxsentinel-ai
+git clone https://github.com/kanaktronics/fluxsentinel-ai
 cd fluxsentinel-ai
 npm install
 
@@ -87,18 +100,12 @@ npm install
 cp .env.example .env
 # Edit .env with your secrets
 
-# 3. Start development server
+# 3. Start development server (Auto-provisions secure Ngrok tunnel)
 npm run dev
-
-# 4. Configure GitLab webhook
-# Settings → Webhooks → Add new webhook
-# URL: https://your-server.com/webhook
-# Token: your GITLAB_WEBHOOK_SECRET value
-# Trigger: Merge request events
 ```
 
-### Deploy to Google Cloud Run (Production)
-The project is architected to deploy directly to Firebase (Cloud Run 2nd Gen) as a serverless container.
+### Deploy Your Own Enterprise Cloud Run Instance
+The project is structurally designed for Google Cloud Run (2nd Gen) Firebase deployments.
 
 ```bash
 # 1. Login to Google Cloud / Firebase
@@ -106,9 +113,6 @@ firebase login
 
 # 2. Deploy the multi-tenant architecture
 firebase deploy --only functions
-
-# 3. Access your live instance!
-# Firebase will automatically provision a global HTTPS endpoint.
 ```
 
 ## Environment Variables
@@ -184,11 +188,11 @@ curl -X POST http://localhost:3000/webhook \
 
 ## Architecture Highlights
 
-- **Real RAG**: Vectra vector store with cosine similarity (not prompt stuffing)
-- **3-Layer Security**: Regex + Claude semantic + OSV CVE database
-- **One-Click Fixes**: GitLab suggestion comments applied in one click
-- **Auto-Config**: `/api/config` endpoint makes this a product, not a demo
-- **Production Security**: `crypto.timingSafeEqual`, Helmet, 3-tier rate limiting
+- **Adversarial AI Consensus**: Rather than trusting one LLM, we pit **Claude 3.7 Sonnet** against **Gemini 2.0 Flash**. If Gemini calls out an SQL injection, Claude is prompted to cross-examine the claim. If they reach consensus, it's flagged. Zero false-positives.
+- **Real RAG**: Vectra vector store with cosine similarity (not just huge context window stuffing)
+- **One-Click Fixes**: GitLab suggestion comments applied via the Gitlab UI in one click
+- **Multi-Tenant SaaS Security**: Firestore queries are securely walled-off by `userId`. Passwords are encrypted with `bcrypt 12-rounds` and Gitlab keys are ferried seamlessly via Node `AsyncLocalStorage`.
+- **Stateless Cloud Run Resiliency**: We use Google Cloud Run with `firebase-functions/v2`, allowing dynamic horizontal auto-scaling without ever dropping an AI workflow.
 
 ## Demo Video
 
