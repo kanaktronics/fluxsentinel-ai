@@ -3,6 +3,9 @@
 > **Autonomous DevSecOps orchestrator for GitLab Merge Requests**  
 > GitLab AI Hackathon 2026 — Competing for $65,000 in prizes
 
+**🚀 Live Instance (Try it!):** [https://api-urtl66e5lq-uc.a.run.app/](https://api-urtl66e5lq-uc.a.run.app/)  
+**📹 Demo Video:** [Watch on YouTube](https://youtu.be/YQyuyM2b5IA)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org)
 [![Anthropic Claude](https://img.shields.io/badge/Anthropic-Claude%20claude--sonnet--4--6-orange.svg)](https://anthropic.com)
@@ -61,7 +64,7 @@ GitLab MR Opened
 
 - ✅ **GitLab Duo Agent Platform** — Built on the GitLab Duo Agent Platform with multi-agent orchestration
 - ✅ **Anthropic Bonus ($10,000)** — Powered by Anthropic Claude claude-sonnet-4-6 through GitLab's Anthropic integration
-- ✅ **Google Cloud Bonus ($10,000)** — Deployed on Google Cloud Run with containerized architecture
+- ✅ **Google Cloud Bonus ($10,000)** — Deployed natively on Google Cloud Run (2nd Gen) via Firebase Functions for stateless, auto-scaling multi-tenant orchestration.
 - ✅ **Green Agent Bonus ($3,000)** — Green Agent: reduces unnecessary pipeline compute through early issue detection
 
 ## Setup & Installation
@@ -94,19 +97,18 @@ npm run dev
 # Trigger: Merge request events
 ```
 
-### Deploy to Google Cloud Run
+### Deploy to Google Cloud Run (Production)
+The project is architected to deploy directly to Firebase (Cloud Run 2nd Gen) as a serverless container.
 
 ```bash
-# Build and push container
-gcloud builds submit --tag gcr.io/YOUR_PROJECT/fluxsentinel
+# 1. Login to Google Cloud / Firebase
+firebase login
 
-# Deploy to Cloud Run
-gcloud run deploy fluxsentinel \
-  --image gcr.io/YOUR_PROJECT/fluxsentinel \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars="GITLAB_TOKEN=xxx,ANTHROPIC_API_KEY=xxx,..."
+# 2. Deploy the multi-tenant architecture
+firebase deploy --only functions
+
+# 3. Access your live instance!
+# Firebase will automatically provision a global HTTPS endpoint.
 ```
 
 ## Environment Variables
@@ -190,7 +192,7 @@ curl -X POST http://localhost:3000/webhook \
 
 ## Demo Video
 
-[📹 Watch Demo](#) ← _Link to be added before Devpost submission_
+[📹 Watch Demo on YouTube](https://youtu.be/YQyuyM2b5IA)
 
 ## License
 
