@@ -233,3 +233,40 @@ if (copyUrlBtn) copyUrlBtn.addEventListener('click', copyUrl);
 const refreshBtn = document.getElementById('refreshBtn');
 if (refreshBtn) refreshBtn.addEventListener('click', loadData);
 
+// --- LIVE TERMINAL POLLING ---
+let lastLogCount = 0;
+async function pollActiveRuns() {
+  try {
+    const data = await api('/api/runs/active');
+    const termSec = document.getElementById('terminalSection');
+    const termTitle = document.getElementById('activeRunTitle');
+    const termBody = document.getElementById('terminalBody');
+    
+    if (!data || !data.active || data.active.length === 0) {
+      if (termSec.style.display !== 'none') {
+        termSec.style.display = 'none';
+        lastLogCount = 0;
+        // Run just finished! Refresh the table immediately to show the result
+        loadData();
+      }
+      return;
+    }
+
+    const run = data.active[0]; // Render the most recent active run
+    termSec.style.display = 'block';
+    termTitle.textContent = `${run.mrIid} - ${run.mrTitle}`;
+    
+    const logs = run.logs || [];
+    if (logs.length > lastLogCount) {
+      termBody.innerHTML = logs.map(l => `<div><span style="color:#71717a">[${new Date().toLocaleTimeString()}]</span> ${l}</div>`).join('');
+      termBody.scrollTop = termBody.scrollHeight;
+      lastLogCount = logs.length;
+    }
+  } catch (err) {
+    // Silent fail to avoid polluting console on network drops
+  }
+}
+
+pollActiveRuns();
+setInterval(pollActiveRuns, 2000);
+

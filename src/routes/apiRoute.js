@@ -128,6 +128,28 @@ router.post('/api/user/connect', authenticateDashboard, async (req, res) => {
   }
 });
 
+// ── GET /api/runs/active ──────────────────────────────────────────────────
+router.get('/api/runs/active', authenticateDashboard, async (req, res) => {
+  try {
+    const userId = req.user.userId || `env-${req.user.sub}`;
+    // Fetch all currently active runs for this tenant
+    const snap = await db.collection('runs_active')
+      .where('userId', '==', userId)
+      .get();
+      
+    if (snap.empty) {
+      return res.json({ active: [] });
+    }
+    
+    // Return array of running jobs and their log history
+    const active = snap.docs.map(doc => doc.data());
+    res.json({ active });
+  } catch (err) {
+    logger.error(`/api/runs/active error: ${err.message}`);
+    res.status(500).json({ active: [] });
+  }
+});
+
 // ── GET /api/metrics ──────────────────────────────────────────────────────
 
 router.get('/api/metrics', authenticateDashboard, async (req, res) => {

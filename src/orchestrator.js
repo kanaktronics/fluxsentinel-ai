@@ -15,6 +15,7 @@ import { trackGreen } from './agents/greenSentinel.js';
 import { takeAction } from './agents/actionAgent.js';
 import { gitlabAuthContext } from './tools/gitlabClient.js';
 import { db } from './db.js';
+import admin from 'firebase-admin';
 
 /**
  * Run all 6 agents in sequence for an MR.
@@ -27,8 +28,35 @@ export async function orchestrate({ mr, project, user }) {
   return gitlabAuthContext.run(user || {}, async () => {
     const runId = `${mr.iid}-${Date.now()}`;
     const orchestrateStart = Date.now();
+    const resolvedUserId = user?.userId || user?.id || 'anonymous';
+
+    const addLog = async (msg) => {
+      logger.info(msg);
+      if (resolvedUserId === 'anonymous') return;
+      try {
+        await db.collection('runs_active').doc(runId).update({
+          logs: admin.firestore.FieldValue.arrayUnion(msg),
+          updatedAt: new Date().toISOString()
+        });
+      } catch (err) {}
+    };
 
     logger.info(`[Orchestrator] Starting run ${runId} for MR !${mr.iid} in project ${project?.id || mr.project_id} (User: ${user?.username || 'admin'})`);
+
+    try {
+      if (resolvedUserId !== 'anonymous') {
+        await db.collection('runs_active').doc(runId).set({
+          runId,
+          userId: resolvedUserId,
+          mrIid: mr.iid,
+          mrTitle: mr.title,
+          status: 'In Progress',
+          startedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          logs: [`[FluxSentinel] Intercepted MR !${mr.iid} - Initiating AI DevSecOps sequence...`]
+        });
+      }
+    } catch (err) {}
 
     const run = {
       runId,
@@ -50,7 +78,7 @@ export async function orchestrate({ mr, project, user }) {
 
     // ── Agent 1: Context Engine ────────────────────────────────────────────────
     try {
-      logger.info('[Orchestrator] → Agent 1: Context Engine');
+      await addLog('[Orchestrator] → Agent 1: Context Engine (Extracting Git Diff & Context)');
       run.context = await buildContext({ mr, project });
     } catch (err) {
       logger.error(`[Orchestrator] Agent 1 failed: ${err.message}`);
@@ -60,7 +88,7 @@ export async function orchestrate({ mr, project, user }) {
 
     // ── Agent 2: Security Auditor ─────────────────────────────────────────────
     try {
-      logger.info('[Orchestrator] → Agent 2: Security Auditor');
+      await addLog('[Orchestrator] → Agent 2: Security Auditor (Multi-Model Consensus: Claude + Gemini)');
       run.audit = await auditSecurity({ mr, context: run.context });
     } catch (err) {
       logger.error(`[Orchestrator] Agent 2 failed: ${err.message}`);
@@ -70,7 +98,7 @@ export async function orchestrate({ mr, project, user }) {
 
     // ── Agent 3: Docs Guardian ────────────────────────────────────────────────
     try {
-      logger.info('[Orchestrator] → Agent 3: Docs Guardian');
+      await addLog('[Orchestrator] → Agent 3: Docs Guardian (Checking inline documentation)');
       run.docs = await guardDocs({ mr, context: run.context, audit: run.audit });
     } catch (err) {
       logger.error(`[Orchestrator] Agent 3 failed: ${err.message}`);
@@ -80,7 +108,7 @@ export async function orchestrate({ mr, project, user }) {
 
     // ── Agent 4: Risk Scorer ──────────────────────────────────────────────────
     try {
-      logger.info('[Orchestrator] → Agent 4: Risk Scorer');
+      await addLog('[Orchestrator] → Agent 4: Risk Scorer (Calculating dynamic CVE risk metrics)');
       run.risk = await scoreRisk({ mr, context: run.context, audit: run.audit, docs: run.docs });
     } catch (err) {
       logger.error(`[Orchestrator] Agent 4 failed: ${err.message}`);
@@ -90,7 +118,7 @@ export async function orchestrate({ mr, project, user }) {
 
     // ── Agent 5: Green Sentinel ───────────────────────────────────────────────
     try {
-      logger.info('[Orchestrator] → Agent 5: Green Sentinel');
+      await addLog('[Orchestrator] → Agent 5: Green Sentinel (Calculating carbon emission offsets)');
       run.green = await trackGreen({ mr, audit: run.audit });
     } catch (err) {
       logger.error(`[Orchestrator] Agent 5 failed: ${err.message}`);
@@ -100,7 +128,7 @@ export async function orchestrate({ mr, project, user }) {
 
     // ── Agent 6: Action Agent ─────────────────────────────────────────────────
     try {
-      logger.info('[Orchestrator] → Agent 6: Action Agent');
+      await addLog('[Orchestrator] → Agent 6: Action Agent (Posting MR payload & emailing executive brief)');
       run.action = await takeAction({
         mr,
         project,
@@ -128,6 +156,13 @@ export async function orchestrate({ mr, project, user }) {
 
     // Persist run to disk for dashboard history
     await saveRunResult(runId, run, user || {});
+
+    // Clean up active run terminal logs
+    if (resolvedUserId !== 'anonymous') {
+      try {
+        await db.collection('runs_active').doc(runId).delete();
+      } catch (err) {}
+    }
 
     return run;
   });
