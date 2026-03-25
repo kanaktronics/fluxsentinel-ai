@@ -98,10 +98,15 @@ npm install
 
 # 2. Configure environment
 cp .env.example .env
-# Edit .env with your secrets
+
+# 🚨 IMPORTANT: To receive automated Executive Brief emails, you MUST configure:
+# RESEND_API_KEY=your_key
+# TEAM_LEAD_EMAIL=your_actual_email@domain.com (Mandatory)
+# Edit the rest of .env with your Gitlab/Anthropic/Gemini secrets
 
 # 3. Start development server (Auto-provisions secure Ngrok tunnel)
 npm run dev
+# Note: Trigger a test MR and check your inbox to verify Resend email delivery!
 ```
 
 ### Deploy Your Own Enterprise Cloud Run Instance

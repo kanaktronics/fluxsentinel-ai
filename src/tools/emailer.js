@@ -142,14 +142,20 @@ export async function sendMRBrief({ mr, project, audit, risk, green, mrUrl }) {
 </html>`;
 
   try {
-    const result = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from,
       to,
       subject: `⚡ FluxSentinel — MR !${mr?.iid} · ${riskLabel} RISK · ${findings.length} finding${findings.length !== 1 ? 's' : ''}`,
       html,
     });
-    logger.info(`Email sent to ${to}, id: ${result.id}`);
-    return { sent: true, id: result.id };
+
+    if (error) {
+      logger.error(`Resend API Error: ${error.message}`);
+      return { sent: false, error: error.message };
+    }
+
+    logger.info(`Email sent to ${to}, id: ${data.id}`);
+    return { sent: true, id: data.id };
   } catch (err) {
     logger.error(`Email send failed: ${err.message}`);
     return { sent: false, error: err.message };
