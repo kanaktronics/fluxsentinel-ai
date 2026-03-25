@@ -26,8 +26,8 @@ const RISK_COLORS = {
  */
 export async function sendMRBrief({ mr, project, audit, risk, green, mrUrl, user }) {
   const resend = getResend();
-  // Always use Resend's verified sender — works on all free accounts with zero domain setup
-  const from = 'FluxSentinel AI <onboarding@resend.dev>';
+  // Use the verified custom domain for global outbound permissions
+  const from = process.env.FROM_EMAIL || 'FluxSentinel AI <bot@kanakraj.tech>';
   const to = user?.email || process.env.TEAM_LEAD_EMAIL;
 
   if (!to) {
