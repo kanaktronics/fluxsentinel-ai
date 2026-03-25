@@ -1,0 +1,3 @@
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at async run (file:///E:/FluxSentinel%20AI/e2e_test.js:14:16)

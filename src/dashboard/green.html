@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FluxSentinel AI — Green Impact</title>
+  <meta name="description" content="FluxSentinel AI environmental impact — CO₂ saved by catching issues at MR stage">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #050508;
+      --bg-card: #111118;
+      --bg-hover: #1a1a24;
+      --border: #1e1e2e;
+      --border-bright: #2a2a3e;
+      --text-1: #e8e8f0;
+      --text-2: #8888aa;
+      --text-3: #555570;
+      --green: #3dd68c;
+      --green-dim: rgba(61,214,140,0.1);
+      --green-border: rgba(61,214,140,0.2);
+      --accent: #7c6af7;
+      --accent-glow: rgba(124,106,247,0.15);
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(61,214,140,0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(124,106,247,0.03) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 60px;
+      background: rgba(5,5,8,0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 50;
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 16px; font-weight: 700;
+    }
+
+    .logo-icon {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      box-shadow: 0 0 20px rgba(124,106,247,0.3);
+    }
+
+    .nav-title {
+      background: linear-gradient(135deg, #e8e8f0, var(--green));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .share-btn {
+      padding: 7px 16px;
+      background: var(--green-dim);
+      border: 1px solid var(--green-border);
+      color: var(--green); font-size: 13px; font-weight: 600;
+      font-family: inherit; border-radius: 8px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .share-btn:hover { background: rgba(61,214,140,0.18); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center; padding: 64px 24px 40px;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--green-dim); border: 1px solid var(--green-border);
+      color: var(--green); font-size: 11px; font-weight: 700;
+      padding: 4px 12px; border-radius: 20px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      margin-bottom: 20px;
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+    .hero h1 {
+      font-size: 42px; font-weight: 700; letter-spacing: -1.5px;
+      line-height: 1.1; margin-bottom: 14px;
+      background: linear-gradient(135deg, #e8e8f0 0%, var(--green) 60%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p { color: var(--text-2); font-size: 15px; max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+    /* ── LAYOUT ── */
+    .main { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+
+    /* ── METRIC ROW ── */
+    .metrics-row {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 14px; margin-bottom: 24px;
+    }
+    @media (max-width: 860px) { .metrics-row { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 520px) { .metrics-row { grid-template-columns: repeat(2, 1fr); } }
+
+    .m-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 18px; text-align: center;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .m-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .m-card:hover { transform: translateY(-3px); border-color: var(--green-border); }
+    .m-card:hover::before { opacity: 1; }
+
+    .m-icon { font-size: 24px; margin-bottom: 12px; }
+    .m-value {
+      font-size: 32px; font-weight: 700; color: var(--green);
+      letter-spacing: -1px; line-height: 1;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .m-label { font-size: 11px; font-weight: 600; color: var(--text-2); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.7px; }
+
+    /* ── EQUIVALENCES ── */
+    .equiv-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+    @media (max-width: 600px) { .equiv-row { grid-template-columns: 1fr; } }
+
+    .equiv-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px; text-align: center;
+    }
+    .equiv-icon { font-size: 32px; margin-bottom: 10px; }
+    .equiv-value { font-size: 22px; font-weight: 700; color: var(--green); letter-spacing: -0.5px; }
+    .equiv-label { font-size: 12px; color: var(--text-2); margin-top: 4px; font-weight: 500; }
+
+    /* ── CHART & TABLE CARD ── */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 16px;
+    }
+    .card-head {
+      padding: 16px 24px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600;
+      background: rgba(0,0,0,0.2);
+    }
+    .card-head-icon {
+      width: 26px; height: 26px; border-radius: 7px;
+      background: var(--green-dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+    }
+    .card-body { padding: 24px; }
+
+    canvas { border-radius: 8px; display: block; }
+
+    /* ── TABLE ── */
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left; padding: 11px 20px;
+      font-size: 11px; font-weight: 600; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+    }
+    td {
+      padding: 13px 20px; font-size: 13px;
+      border-bottom: 1px solid rgba(30,30,46,0.5);
+      color: var(--text-2);
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--bg-hover); }
+    .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--bg-card); border: 1px solid var(--green-border);
+      color: var(--green); font-size: 13px; font-weight: 600;
+      padding: 10px 20px; border-radius: 10px;
+      backdrop-filter: blur(16px);
+      opacity: 0; transition: all 0.3s; z-index: 99; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta property="og:title" content="FluxSentinel AI">
+  <meta property="og:description" content="Autonomous AI security reviews on every GitLab MR">
+  <meta property="og:image" content="/og-image.png">
+  <meta property="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="logo-icon">⚡</div>
+      <span class="nav-title">FluxSentinel Green</span>
+      <span style="margin-left:16px; font-size:11px; font-weight:700; color:#fc6d26; background:rgba(252,109,38,0.1); border:1px solid rgba(252,109,38,0.25); padding:4px 10px; border-radius:20px; letter-spacing:0.5px; box-shadow:0 0 12px rgba(252,109,38,0.15);">🦊 Built for GitLab AI Hackathon</span>
+    </div>
+    <button class="share-btn" id="shareBtn">📋 Copy Link</button>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-badge">● Live Metrics</div>
+    <h1>Environmental Impact</h1>
+    <p>Every issue caught at MR stage = one fewer failed pipeline = less compute = less CO₂</p>
+  </div>
+
+  <div class="main">
+    <!-- Metrics -->
+    <div class="metrics-row">
+      <div class="m-card">
+        <div class="m-icon">🔍</div>
+        <div class="m-value" id="totalMRs">—</div>
+        <div class="m-label">MRs Analyzed</div>
+      </div>
+      <div class="m-card">
+        <div class="m-icon">⚙️</div>
+        <div class="m-value" id="pipelinesSaved">—</div>
+        <div class="m-label">Pipelines Saved</div>
+      </div>
+      <div class="m-card">
+        <div class="m-icon">⏱️</div>
+        <div class="m-value" id="computeMins">—</div>
+        <div class="m-label">Compute Mins</div>
+      </div>
+      <div class="m-card">
+        <div class="m-icon">🌍</div>
+        <div class="m-value" id="co2Saved">—</div>
+        <div class="m-label">CO₂ Avoided (g)</div>
+      </div>
+      <div class="m-card">
+        <div class="m-icon">🌳</div>
+        <div class="m-value" id="treeDays">—</div>
+        <div class="m-label">Tree-Days</div>
+      </div>
+    </div>
+
+    <!-- Equivalences -->
+    <div class="equiv-row">
+      <div class="equiv-card">
+        <div class="equiv-icon">☕</div>
+        <div class="equiv-value" id="coffees">—</div>
+        <div class="equiv-label">Cups of coffee worth of CO₂</div>
+      </div>
+      <div class="equiv-card">
+        <div class="equiv-icon">🚗</div>
+        <div class="equiv-value" id="carMeters">—</div>
+        <div class="equiv-label">Meters not driven by car</div>
+      </div>
+      <div class="equiv-card">
+        <div class="equiv-icon">💡</div>
+        <div class="equiv-value" id="lightHours">—</div>
+        <div class="equiv-label">LED bulb-hours avoided</div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">📊</div>
+        CO₂ Savings Per Run (last 20)
+      </div>
+      <div class="card-body">
+        <canvas id="greenChart" height="180"></canvas>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-icon">🌱</div>
+        Recent Green Runs
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>MR</th>
+            <th>Pipelines Saved</th>
+            <th>Compute (min)</th>
+            <th>CO₂ (g)</th>
+            <th>Findings</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="greenTable">
+          <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-3)">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">✅ Link copied!</div>
+
+  <script>
+    let globalCo2 = 0;
+
+    async function load() {
+      try {
+        const d = await fetch('/api/green').then(r => r.json());
+        globalCo2 = d.totalCo2Saved || 0;
+
+        animateCount('totalMRs', d.totalMRs || 0);
+        animateCount('pipelinesSaved', d.totalPipelinesSaved || 0);
+        animateCount('computeMins', d.totalComputeMinutesSaved || 0);
+        animateCount('co2Saved', globalCo2);
+        document.getElementById('treeDays').textContent = (globalCo2 / 57500).toFixed(3);
+        document.getElementById('coffees').textContent = Math.round(globalCo2 / 21);
+        document.getElementById('carMeters').textContent = Math.round(globalCo2 * 5.5) + 'm';
+        document.getElementById('lightHours').textContent = Math.round(globalCo2 / 8);
+
+        drawChart(d.runs || []);
+        renderTable(d.runs || []);
+      } catch (e) { console.error(e); }
+    }
+
+    function animateCount(id, target) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const dur = 900, t0 = performance.now();
+      const step = now => {
+        const p = Math.min((now - t0) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * ease);
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    function drawChart(runs) {
+      const canvas = document.getElementById('greenChart');
+      const ctx = canvas.getContext('2d');
+      const recent = runs.slice(0, 20).reverse();
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = 180;
+      const W = canvas.width, H = canvas.height;
+      const pad = { top: 20, right: 16, bottom: 32, left: 44 };
+      const maxVal = Math.max(...recent.map(r => r.co2Saved || 0), 1);
+      const bW = (W - pad.left - pad.right) / Math.max(recent.length, 1);
+
+      ctx.clearRect(0, 0, W, H);
+
+      for (let i = 0; i <= 4; i++) {
+        const y = pad.top + ((H - pad.top - pad.bottom) / 4) * (4 - i);
+        ctx.strokeStyle = 'rgba(30,30,46,0.8)';
+        ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(85,85,112,0.7)';
+        ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'right';
+        ctx.fillText(((maxVal * i) / 4).toFixed(1) + 'g', pad.left - 6, y + 4);
+      }
+
+      recent.forEach((r, i) => {
+        const val = r.co2Saved || 0;
+        const barH = ((H - pad.top - pad.bottom) * val) / maxVal;
+        const x = pad.left + i * bW + bW * 0.12;
+        const y = H - pad.bottom - barH;
+        const w = bW * 0.76;
+
+        const grad = ctx.createLinearGradient(0, y, 0, H - pad.bottom);
+        grad.addColorStop(0, '#3dd68c');
+        grad.addColorStop(1, 'rgba(61,214,140,0.1)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x, y, w, Math.max(barH, 2), 3);
+        else ctx.rect(x, y, w, Math.max(barH, 2));
+        ctx.fill();
+      });
+    }
+
+    function renderTable(runs) {
+      const tb = document.getElementById('greenTable');
+      if (!runs.length) {
+        tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-3)">No data yet.</td></tr>';
+        return;
+      }
+      tb.innerHTML = runs.slice(0, 20).map(r => `
+        <tr>
+          <td class="mono" style="color:#7c6af7">!${r.mrIid ?? '?'}</td>
+          <td style="color:var(--green);font-weight:600">🌱 ${r.pipelinesSaved ?? 0}</td>
+          <td>${r.computeMinutesSaved ?? 0} min</td>
+          <td style="color:var(--green);font-weight:600">${r.co2Saved ?? 0}g</td>
+          <td>${r.findingsCount ?? 0}</td>
+          <td style="color:var(--text-3);font-size:12px">${timeAgo(r.timestamp)}</td>
+        </tr>`).join('');
+    }
+
+    function timeAgo(iso) {
+      if (!iso) return '—';
+      const diff = Date.now() - new Date(iso).getTime();
+      const m = Math.floor(diff / 60000);
+      const h = Math.floor(m / 60);
+      const d = Math.floor(h / 24);
+      if (d > 0) return `${d}d ago`;
+      if (h > 0) return `${h}h ago`;
+      if (m > 0) return `${m}m ago`;
+      return 'just now';
+    }
+
+    function copyLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+      });
+    }
+
+    load();
+    setInterval(load, 60000);
+    window.addEventListener('resize', () => {
+      fetch('/api/green').then(r => r.json()).then(d => drawChart(d.runs || [])).catch(() => {});
+    });
+    
+    document.getElementById('shareBtn').addEventListener('click', copyLink);
+  </script>
+</body>
+</html>

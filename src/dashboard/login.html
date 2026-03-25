@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FluxSentinel AI — Sign In</title>
+  <meta name="description" content="Sign in to FluxSentinel AI — Autonomous DevSecOps Orchestrator">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #050508;
+      --card: rgba(15,15,25,0.85);
+      --border: rgba(124,106,247,0.18);
+      --border-hover: rgba(124,106,247,0.4);
+      --text-1: #e8e8f0;
+      --text-2: #8888aa;
+      --text-3: #555570;
+      --accent: #7c6af7;
+      --accent-dim: rgba(124,106,247,0.12);
+      --accent-glow: rgba(124,106,247,0.35);
+      --green: #3dd68c;
+      --error: #f87171;
+      --error-bg: rgba(248,113,113,0.08);
+      --input-bg: rgba(255,255,255,0.04);
+      --input-focus: rgba(124,106,247,0.08);
+      --radius: 14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ── AMBIENT ORBS ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(124,106,247,0.12); top: -150px; left: -150px; animation-delay: 0s; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(61,214,140,0.07); bottom: -100px; right: -100px; animation-delay: -4s; }
+    .orb-3 { width: 300px; height: 300px; background: rgba(168,85,247,0.08); top: 50%; left: 60%; animation-delay: -8s; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.08); } }
+
+    /* ── GRID OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(124,106,247,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,106,247,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    /* ── CARD ── */
+    .card {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 400px;
+      margin: 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 0 60px rgba(124,106,247,0.08), 0 32px 64px rgba(0,0,0,0.5);
+      animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
+
+    /* ── LOGO ── */
+    .logo {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 28px;
+    }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 24px var(--accent-glow);
+    }
+    .logo-text { font-size: 18px; font-weight: 700; }
+    .logo-badge {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      color: var(--accent); background: var(--accent-dim);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 2px 6px; margin-left: 2px;
+    }
+
+    .card-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.5px; }
+    .card-sub { font-size: 13px; color: var(--text-2); margin-bottom: 28px; line-height: 1.5; }
+
+    /* ── FORM ── */
+    .field { margin-bottom: 16px; }
+    .label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--text-2); margin-bottom: 7px;
+      letter-spacing: 0.3px; text-transform: uppercase;
+    }
+    .input {
+      width: 100%; padding: 11px 14px;
+      background: var(--input-bg);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: var(--text-1); font-size: 14px; font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .input::placeholder { color: var(--text-3); }
+    .input:focus {
+      border-color: var(--accent);
+      background: var(--input-focus);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    /* ── BUTTON ── */
+    .btn-primary {
+      width: 100%; padding: 12px;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      border: none; border-radius: 10px;
+      color: #fff; font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; letter-spacing: 0.2px;
+      position: relative; overflow: hidden;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px var(--accent-glow);
+      margin-top: 8px;
+    }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 28px var(--accent-glow); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.7s linear infinite; vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ERROR ── */
+    .error {
+      display: none; margin-top: 14px; padding: 10px 14px;
+      background: var(--error-bg); border: 1px solid rgba(248,113,113,0.2);
+      border-radius: 8px; color: var(--error); font-size: 13px;
+      animation: shake 0.4s cubic-bezier(0.36,0.07,0.19,0.97);
+    }
+    @keyframes shake {
+      10%, 90% { transform: translateX(-2px); }
+      20%, 80% { transform: translateX(3px); }
+      30%, 50%, 70% { transform: translateX(-3px); }
+      40%, 60% { transform: translateX(3px); }
+    }
+
+    /* ── FOOTER ── */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 22px 0; color: var(--text-3); font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06);
+    }
+
+    .footer-link {
+      text-align: center; font-size: 13px; color: var(--text-2);
+    }
+    .footer-link a {
+      color: var(--accent); text-decoration: none; font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .footer-link a:hover { opacity: 0.8; }
+
+    .powered {
+      text-align: center; margin-top: 20px;
+      font-size: 11px; color: var(--text-3);
+    }
+  </style>
+
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta property="og:title" content="FluxSentinel AI">
+  <meta property="og:description" content="Autonomous AI security reviews on every GitLab MR">
+  <meta property="og:image" content="/og-image.png">
+  <meta property="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <span class="logo-text">FluxSentinel</span>
+        <span class="logo-badge">AI</span>
+      </div>
+    </div>
+
+    <h1 class="card-title">Welcome back</h1>
+    <p class="card-sub">Sign in to access your DevSecOps dashboard</p>
+
+    <div class="field">
+      <label class="label" for="username">Username</label>
+      <input type="text" id="username" class="input" placeholder="your-username" autocomplete="username">
+    </div>
+
+    <div class="field">
+      <label class="label" for="password">Password</label>
+      <input type="password" id="password" class="input" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-primary" id="loginBtn">Sign in</button>
+
+    <div class="error" id="errorMsg"></div>
+
+    <div class="divider">or</div>
+
+    <div class="footer-link">
+      Don't have an account? <a href="/signup">Create one →</a>
+    </div>
+
+    <div class="powered" style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+      <span>Powered by Claude AI · Gemini AI</span>
+      <span style="color:#fc6d26; font-weight:700; padding:4px 10px; background:rgba(252,109,38,0.12); border-radius:12px; border:1px solid rgba(252,109,38,0.25);">🦊 Built for GitLab AI Hackathon</span>
+    </div>
+  </div>
+
+  <script>
+    // Check existing valid token
+    const t = localStorage.getItem('flux_token');
+    if (t) {
+      fetch('/api/metrics', { headers: { Authorization: `Bearer ${t}` } })
+        .then(r => { if (r.ok) window.location.href = '/dashboard'; else localStorage.removeItem('flux_token'); })
+        .catch(() => localStorage.removeItem('flux_token'));
+    }
+
+    async function handleLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('loginBtn');
+      const err = document.getElementById('errorMsg');
+
+      if (!username || !password) { showError('Please enter your username and password'); return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-spinner"></span> Signing in...';
+      err.style.display = 'none';
+
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+        if (res.ok && data.token) {
+          localStorage.setItem('flux_token', data.token);
+          localStorage.setItem('flux_user', data.username);
+          localStorage.setItem('flux_role', data.role);
+          // New users (from signup) go to setup; returning users go to dashboard
+          const dest = data.firstLogin ? '/setup' : '/dashboard';
+          window.location.href = dest;
+        } else {
+          showError(data.error || 'Invalid credentials');
+        }
+      } catch {
+        showError('Connection error. Is the server running?');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Sign in';
+      }
+    }
+
+    function showError(msg) {
+      const err = document.getElementById('errorMsg');
+      err.textContent = msg;
+      err.style.display = 'block';
+      err.style.animation = 'none';
+      err.offsetHeight; // reflow
+      err.style.animation = 'shake 0.4s cubic-bezier(0.36,0.07,0.19,0.97)';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+    document.getElementById('loginBtn').addEventListener('click', handleLogin);
+  </script>
+</body>
+</html>

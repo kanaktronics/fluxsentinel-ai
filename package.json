@@ -1,0 +1,42 @@
+{
+  "name": "fluxsentinel-ai",
+  "version": "1.0.0",
+  "description": "⚡ Autonomous multi-agent DevSecOps orchestrator for GitLab Merge Requests",
+  "type": "module",
+  "main": "src/webhook.js",
+  "scripts": {
+    "dev": "node --watch --watch-path=src src/webhook.js",
+    "start": "node src/webhook.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@google/generative-ai": "^0.21.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "express-jwt": "^8.4.1",
+    "express-rate-limit": "^7.2.0",
+    "firebase-admin": "^13.7.0",
+    "firebase-functions": "^7.2.2",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2",
+    "resend": "^3.5.0",
+    "uuid": "^9.0.1",
+    "vectra": "^0.9.0",
+    "winston": "^3.12.0"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "license": "MIT",
+  "keywords": [
+    "gitlab",
+    "devsecops",
+    "ai",
+    "agents",
+    "anthropic",
+    "security"
+  ]
+}

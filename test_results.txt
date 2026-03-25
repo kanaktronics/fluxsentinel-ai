@@ -1,0 +1,15 @@
+GET /api/status: 200 {"status":"ok","version":"1.0.0","webhookUrl":null,"publicUrl":null,"setupUrl":null,"localUrl":"http
+GET /api/green: 200 {"totalMRs":6,"totalPipelinesSaved":25,"totalComputeMinutesSaved":150,"totalCo2Saved":60,"totalFindi
+GET /api/health: 401 {"error":"Unauthorized: No token provided"}
+GET /api/user/profile: 401 {"error":"Unauthorized: No token provided"}
+GET /api/metrics: 401 {"error":"Unauthorized: No token provided"}
+GET /api/runs: 401 {"error":"Unauthorized: No token provided"}
+GET /api/settings: 404 {"error":"Not Found","message":"The requested route does not exist"}
+POST /api/user/connect: 401 {"error":"Unauthorized: No token provided"}
+POST /webhook: 401 {"error":"Unauthorized: Missing webhook token"}
+POST /auth/login: 400 {"error":"Username and password are required"}
+POST /auth/signup: 400 {"error":"Username and password are required"}
+GET /login: 200 <!DOCTYPE html><html lang="en"><head>  <meta charset="UTF-8">  <meta name="viewport" content="wi
+GET /dashboard: 200 <!DOCTYPE html><html lang="en"><head>  <meta charset="UTF-8">  <meta name="viewport" content="wi
+GET /signup: 200 <!DOCTYPE html><html lang="en"><head>  <meta charset="UTF-8">  <meta name="viewport" content="wi
+GET /setup: 200 <!DOCTYPE html><html lang="en"><head>  <meta charset="UTF-8">  <meta name="viewport" content="wi
