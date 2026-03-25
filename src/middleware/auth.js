@@ -31,7 +31,7 @@ export async function validateWebhookSecret(req, res, next) {
     if (envToken) {
       const expected = Buffer.from(envToken);
       if (incoming.length === expected.length && crypto.timingSafeEqual(incoming, expected)) {
-        matchedUser = { username: 'admin', role: 'admin', gitlabToken: process.env.GITLAB_TOKEN || '' };
+        matchedUser = { id: 'env-admin', userId: 'env-admin', username: 'admin', role: 'admin', gitlabToken: process.env.GITLAB_TOKEN || '' };
       }
     }
 
