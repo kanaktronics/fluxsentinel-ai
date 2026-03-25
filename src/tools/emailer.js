@@ -24,14 +24,14 @@ const RISK_COLORS = {
 /**
  * Send the executive MR brief to the team lead.
  */
-export async function sendMRBrief({ mr, project, audit, risk, green, mrUrl }) {
+export async function sendMRBrief({ mr, project, audit, risk, green, mrUrl, user }) {
   const resend = getResend();
   // Always use Resend's verified sender — works on all free accounts with zero domain setup
   const from = 'FluxSentinel AI <onboarding@resend.dev>';
-  const to = process.env.TEAM_LEAD_EMAIL;
+  const to = user?.email || process.env.TEAM_LEAD_EMAIL;
 
   if (!to) {
-    logger.warn('Emailer: TEAM_LEAD_EMAIL not set, skipping email');
+    logger.warn('Emailer: No recipient configured (missing from user profile and TEAM_LEAD_EMAIL)');
     return { sent: false, reason: 'No recipient configured' };
   }
 

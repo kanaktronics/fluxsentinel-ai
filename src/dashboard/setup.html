@@ -170,6 +170,8 @@
       <div class="progress-dot" id="dot-2"></div>
       <div class="progress-line"></div>
       <div class="progress-dot" id="dot-3"></div>
+      <div class="progress-line"></div>
+      <div class="progress-dot" id="dot-4"></div>
     </div>
 
     <!-- Webhook URL -->
@@ -243,10 +245,31 @@
         </div>
       </div>
 
-      <!-- ── STEP 3: AI API Keys (info only, server-side) ── -->
+      <!-- ── STEP 3: Setup Executive Email ── -->
       <div class="step" id="step-2">
         <div class="step-head" id="head-2">
           <div class="step-num" id="num-2">3</div>
+          <div style="flex:1">
+            <div class="step-title">Executive Alert Email</div>
+            <div class="step-sub">Where should FluxSentinel send the MR summary briefs?</div>
+          </div>
+          <div class="step-chevron">▾</div>
+        </div>
+        <div class="step-body">
+          <p class="hint">When an MR is processed, the Action Agent sends a beautifully formatted executive brief detailing the risk score, consensus verdict, and auto-fixes applied.</p>
+          <div class="token-form">
+            <label for="emailInput">Your Destination Email</label>
+            <input type="email" id="emailInput" class="token-input" placeholder="you@company.com" autocomplete="off">
+            <button class="btn-save" id="saveEmailBtn">📧 Save Email</button>
+          </div>
+          <div class="step-msg" id="msg-2"></div>
+        </div>
+      </div>
+
+      <!-- ── STEP 4: AI API Keys (info only, server-side) ── -->
+      <div class="step" id="step-3">
+        <div class="step-head" id="head-3">
+          <div class="step-num" id="num-3">4</div>
           <div style="flex:1">
             <div class="step-title">Confirm AI is Active</div>
             <div class="step-sub">Claude + Gemini power the security audit engine</div>
@@ -256,16 +279,16 @@
         <div class="step-body">
           <p class="hint">The AI keys are configured server-side by the admin. Click <strong>Check Status</strong> to confirm the AI engine is active for your analyses.</p>
           <button class="test-btn" id="aiCheckBtn">🤖 Check AI Status</button>
-          <div class="step-msg" id="msg-2"></div>
-          <div class="step-msg" id="msg-2b" style="margin-top:8px"></div>
+          <div class="step-msg" id="msg-3"></div>
+          <div class="step-msg" id="msg-3b" style="margin-top:8px"></div>
           <button class="btn-done" id="aiDoneBtn" style="display:none">✓ AI is ready</button>
         </div>
       </div>
 
-      <!-- ── STEP 4: Test ── -->
-      <div class="step" id="step-3">
-        <div class="step-head" id="head-3">
-          <div class="step-num" id="num-3">4</div>
+      <!-- ── STEP 5: Test ── -->
+      <div class="step" id="step-4">
+        <div class="step-head" id="head-4">
+          <div class="step-num" id="num-4">5</div>
           <div style="flex:1">
             <div class="step-title">Test the Connection</div>
             <div class="step-sub">Verify FluxSentinel can receive your GitLab events</div>
@@ -275,7 +298,7 @@
         <div class="step-body">
           <p class="hint">Click <strong>Send Test Event</strong> in GitLab (Webhooks → Test → Merge request events), then check:</p>
           <button class="test-btn" id="testBtn">🔌 Verify Server is Live</button>
-          <div class="step-msg" id="msg-3"></div>
+          <div class="step-msg" id="msg-4"></div>
           <p class="hint" style="margin-top:16px">Once GitLab shows <strong style="color:var(--green)">200 OK</strong>, open or update any Merge Request — FluxSentinel will analyze it and post a comment automatically.</p>
           <button class="btn-done" id="finishBtn" style="display:none">🚀 All done — Go to Dashboard</button>
         </div>
@@ -359,7 +382,7 @@
 
       toast(`Step ${i + 1} complete ✅`);
 
-      if (i < 3) {
+      if (i < 4) {
         setTimeout(() => openStep(i + 1), 350);
       } else {
         document.getElementById('finishCard').classList.add('show');
@@ -453,27 +476,55 @@
       btn.innerHTML = '🔐 Save Webhook Secret';
     }
 
-    // ── Step 3: Check AI status ───────────────────────────────────────────
+    // ── Step 3: Save Executive Email ─────────────────────────────────────
+    async function saveEmail() {
+      const val = document.getElementById('emailInput').value.trim();
+      if (!val || !val.includes('@')) { showMsg('msg-2', '⚠ valid email required', true); return; }
+
+      const btn = document.getElementById('saveEmailBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+      try {
+        const res = await fetch('/api/user/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ email: val }),
+        });
+        if (res.ok) {
+          showMsg('msg-2', '✅ Notification email saved!', false);
+          setTimeout(() => markDone(2), 900);
+        } else {
+          showMsg('msg-2', `❌ Failed to save email`, true);
+        }
+      } catch {
+        showMsg('msg-2', '❌ Connection error', true);
+      }
+      btn.disabled = false;
+      btn.innerHTML = '📧 Save Email';
+    }
+
+    // ── Step 4: Check AI status ───────────────────────────────────────────
     async function checkAI() {
       const btn = document.getElementById('aiCheckBtn');
       btn.innerHTML = '<span class="spinner"></span> Checking...';
       btn.disabled = true;
       try {
         const d = await fetch('/api/status').then(r => r.json());
-        showMsg('msg-2', '✅ Server is live and accepting requests.', false);
-        showMsg('msg-2b', 'ℹ️ AI keys (Claude + Gemini) are configured by your server admin. If analyses fail, contact them.', false);
-        document.getElementById('msg-2b').style.background = 'rgba(124,106,247,0.06)';
-        document.getElementById('msg-2b').style.borderColor = 'rgba(124,106,247,0.2)';
-        document.getElementById('msg-2b').style.color = 'var(--accent)';
+        showMsg('msg-3', '✅ Server is live and accepting requests.', false);
+        showMsg('msg-3b', 'ℹ️ AI keys (Claude + Gemini) are configured by your server admin. If analyses fail, contact them.', false);
+        document.getElementById('msg-3b').style.background = 'rgba(124,106,247,0.06)';
+        document.getElementById('msg-3b').style.borderColor = 'rgba(124,106,247,0.2)';
+        document.getElementById('msg-3b').style.color = 'var(--accent)';
         document.getElementById('aiDoneBtn').style.display = 'inline-flex';
       } catch {
-        showMsg('msg-2', '❌ Server unreachable', true);
+        showMsg('msg-3', '❌ Server unreachable', true);
       }
       btn.innerHTML = '🤖 Check Again';
       btn.disabled = false;
     }
 
-    // ── Step 4: Test connection ──────────────────────────────────────────
+    // ── Step 5: Test connection ──────────────────────────────────────────
     async function testConnection() {
       const btn = document.getElementById('testBtn');
       btn.innerHTML = '<span class="spinner"></span> Testing...';
@@ -481,11 +532,11 @@
       try {
         const d = await fetch('/api/status').then(r => r.json());
         if (d.status === 'ok') {
-          showMsg('msg-3', `✅ Server is live! ${d.ngrokActive ? `Public webhook: ${d.webhookUrl}` : 'Running locally only.'}`, false);
+          showMsg('msg-4', `✅ Server is live! ${d.ngrokActive ? `Public webhook: ${d.webhookUrl}` : 'Running locally only.'}`, false);
           document.getElementById('finishBtn').style.display = 'inline-flex';
         } else throw new Error();
       } catch {
-        showMsg('msg-3', '❌ Server not reachable. Make sure npm start is running.', true);
+        showMsg('msg-4', '❌ Server not reachable. Make sure npm start is running.', true);
       }
       btn.innerHTML = '🔌 Test Again';
       btn.disabled = false;
@@ -499,12 +550,14 @@
     document.getElementById('head-1').addEventListener('click', () => toggleStep(1));
     document.getElementById('head-2').addEventListener('click', () => toggleStep(2));
     document.getElementById('head-3').addEventListener('click', () => toggleStep(3));
+    document.getElementById('head-4').addEventListener('click', () => toggleStep(4));
     document.getElementById('saveTokenBtn').addEventListener('click', saveToken);
     document.getElementById('saveSecretBtn').addEventListener('click', saveSecret);
+    document.getElementById('saveEmailBtn').addEventListener('click', saveEmail);
     document.getElementById('aiCheckBtn').addEventListener('click', checkAI);
-    document.getElementById('aiDoneBtn').addEventListener('click', () => markDone(2));
+    document.getElementById('aiDoneBtn').addEventListener('click', () => markDone(3));
     document.getElementById('testBtn').addEventListener('click', testConnection);
-    document.getElementById('finishBtn').addEventListener('click', () => markDone(3));
+    document.getElementById('finishBtn').addEventListener('click', () => markDone(4));
   </script>
 </body>
 </html>

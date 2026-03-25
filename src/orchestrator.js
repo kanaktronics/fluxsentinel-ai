@@ -109,6 +109,7 @@ export async function orchestrate({ mr, project, user }) {
         docs: run.docs,
         risk: run.risk,
         green: run.green,
+        user,
       });
     } catch (err) {
       logger.error(`[Orchestrator] Agent 6 failed: ${err.message}`);

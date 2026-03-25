@@ -92,8 +92,8 @@ router.get('/api/user/profile', authenticateDashboard, async (req, res) => {
 
 // ── POST /api/user/connect — saves user's GitLab token to their account ───
 router.post('/api/user/connect', authenticateDashboard, async (req, res) => {
-  const { gitlabToken, webhookSecret } = req.body || {};
-  if (!gitlabToken && !webhookSecret) return res.status(400).json({ error: 'No data provided' });
+  const { gitlabToken, webhookSecret, email } = req.body || {};
+  if (!gitlabToken && !webhookSecret && !email) return res.status(400).json({ error: 'No data provided' });
 
   try {
     const userId = req.user.userId || `env-${req.user.sub}`;
@@ -116,6 +116,7 @@ router.post('/api/user/connect', authenticateDashboard, async (req, res) => {
 
     if (gitlabToken && gitlabToken !== 'keep') user.gitlabToken = gitlabToken;
     if (webhookSecret) user.webhookSecret = webhookSecret;
+    if (email) user.email = email;
     user.connectedAt = new Date().toISOString();
 
     await userRef.set(user, { merge: true });

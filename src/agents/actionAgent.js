@@ -25,7 +25,7 @@ const STATUS_EMOJI = {
   HIGH: '🚨',
 };
 
-export async function takeAction({ mr, project, context, audit, docs, risk, green }) {
+export async function takeAction({ mr, project, context, audit, docs, risk, green, user }) {
   logger.info(`[Agent 6: Action Agent] Starting for MR !${mr.iid}`);
   const startTime = Date.now();
 
@@ -104,7 +104,7 @@ export async function takeAction({ mr, project, context, audit, docs, risk, gree
   // ── 4. Send executive email brief ────────────────────────────────────────
   try {
     const mrUrl = context?.mrDetails?.web_url || `${process.env.GITLAB_API_URL?.replace('/api/v4', '')}/${mr.project_id}/-/merge_requests/${mrIid}`;
-    const emailResult = await sendMRBrief({ mr: context?.mrDetails || mr, project, audit, risk, green, mrUrl });
+    const emailResult = await sendMRBrief({ mr: context?.mrDetails || mr, project, audit, risk, green, mrUrl, user });
     results.emailSent = emailResult.sent;
     if (emailResult.sent) {
       logger.info(`[Agent 6] Email sent, id: ${emailResult.id}`);
