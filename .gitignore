@@ -27,3 +27,6 @@ Thumbs.db
 firebase-debug.log
 test_debug.js
 debug_output.json
+
+# Local tools
+ngrok.exe

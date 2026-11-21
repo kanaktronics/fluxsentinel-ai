@@ -1,17 +1,15 @@
 /**
  * src/ngrok-tunnel.js
- * Spawns the bundled ngrok.exe to expose the local server publicly.
+ * Spawns ngrok to expose the local server publicly during development.
+ * Uses the `ngrok` on your PATH, or the binary at NGROK_BIN if set.
  * Reads NGROK_AUTHTOKEN (required) and NGROK_DOMAIN (optional) from env.
  * Returns the public HTTPS URL once the tunnel is open.
  */
 
 import { spawn } from 'child_process';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import logger from './middleware/logger.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const NGROK_BIN = path.join(__dirname, '..', 'ngrok.exe');
+const NGROK_BIN = process.env.NGROK_BIN || 'ngrok';
 const NGROK_API = 'http://localhost:4040/api/tunnels';
 
 let _publicUrl = null;

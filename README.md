@@ -1,208 +1,101 @@
-# ⚡ FluxSentinel AI
+# FluxSentinel AI
 
-> **Autonomous DevSecOps orchestrator for GitLab Merge Requests**  
-> GitLab AI Hackathon 2026 — Competing for $65,000 in prizes
+**An automated reviewer for GitLab merge requests.** When a merge request opens, FluxSentinel:
+- audits the diff for security issues with two different models
+- checks whether the change breaks the docs
+- scores the risk from 0 to 100
+- posts its review back to GitLab: a summary comment, fix suggestions, a label and an email brief
 
-**🚀 Live Instance (Try it!):** [https://api-urtl66e5lq-uc.a.run.app/](https://api-urtl66e5lq-uc.a.run.app/)  
-**📹 Demo Video:** [Watch on YouTube](https://youtu.be/YQyuyM2b5IA)
+Built for the GitLab AI Hackathon 2026. [**Demo video →**](https://youtu.be/YQyuyM2b5IA)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org)
-[![Anthropic Claude](https://img.shields.io/badge/Anthropic-Claude%20claude--sonnet--4--6-orange.svg)](https://anthropic.com)
-[![Cloud Run](https://img.shields.io/badge/Google%20Cloud-Cloud%20Run-blue.svg)](https://cloud.google.com/run)
-
----
-
-## The Problem
-
-When a developer opens a Merge Request on GitLab, it enters a bottleneck. A human checks security. Another checks documentation. Another checks standards. Teams at high velocity lose **2-3 days per MR** waiting for sequential human reviews.
-
-## The Solution
-
-FluxSentinel AI is a **webhook-triggered, multi-agent orchestration system** that autonomously handles the entire MR review lifecycle the moment code is pushed. Not a chatbot. Not a code generator. **An autonomous system that takes action.**
-
-```
-GitLab MR Opened
-       │
-       ▼
-  POST /webhook
-       │
-       ▼
-┌──────────────────────────────────────────────────────────┐
-│                   ORCHESTRATOR                            │
-│                                                          │
-│  [1] Context Engine ──RAG──▶ VectorStore                 │
-│       ↓                                                  │
-│  [2] Security Auditor ──Claude+Gemini+OSV──▶ Consensus   │
-│       ↓                                                  │
-│  [3] Docs Guardian ──Claude──▶ Wiki Auto-Update          │
-│       ↓                                                  │
-│  [4] Risk Scorer ──Weighted Matrix──▶ Score 0-100        │
-│       ↓                                                  │
-│  [5] Green Sentinel ──CO₂ Math──▶ Green Metrics          │
-│       ↓                                                  │
-│  [6] Action Agent ──GitLab API──▶ Comments+Labels+Email  │
-└──────────────────────────────────────────────────────────┘
-       │
-       ▼
-  MR Has: Dashboard Comment + One-Click Fix Suggestions
-          + Updated Wiki + Label Applied + Email Brief
-```
-
-## Agents
-
-| Agent | Role | Key Action |
-|-------|------|------------|
-| 🧠 Context Engine | RAG system | Embeds MR diff, wiki, issues into vector store |
-| 🔐 Security Auditor | Dual-AI Consensus | Teams up **Claude 3.7 Sonnet** & **Gemini 2.0 Flash** to independently audit code. Only vulnerabilities agreed upon by both models (consensus) and verified against the OSV CVE database are flagged, eliminating AI hallucinations! |
-| 📚 Docs Guardian | Documentation health | Auto-updates GitLab Wiki when code breaks docs |
-| 📊 Risk Scorer | Risk quantification | Weighted 0-100 score → auto-approve/block |
-| 🌱 Green Sentinel | Environmental impact | Tracks compute + CO₂ savings per scan |
-| ⚡ Action Agent | Execution layer | Posts comments, labels, suggestion fixes, emails |
-
-## Prize Pool Eligibility
-
-- ✅ **GitLab Duo Agent Platform** — Built on the GitLab Duo Agent Platform with multi-agent orchestration
-- ✅ **Anthropic Bonus ($10,000)** — Powered by Anthropic Claude claude-sonnet-4-6 through GitLab's Anthropic integration
-- ✅ **Google Cloud Bonus ($10,000)** — Deployed natively on Google Cloud Run (2nd Gen) via Firebase Functions for stateless, auto-scaling multi-tenant orchestration.
-- ✅ **Green Agent Bonus ($3,000)** — Green Agent: reduces unnecessary pipeline compute through early issue detection
-
-## 🚀 How to Try It (Recommended)
-
-FluxSentinel AI is a fully deployed, multi-tenant SaaS application running on Google Cloud Run. **You do not need to install anything or run code locally to test it.**
-
-1. Visit the Live Dashboard: **[https://api-urtl66e5lq-uc.a.run.app/login](https://api-urtl66e5lq-uc.a.run.app/login)**
-2. Enter any email and password to instantly create your secure tenant profile.
-3. Follow the 3-step magic **Setup Wizard** to securely connect your GitLab account.
-4. Open a Merge Request in GitLab — and watch the AI agents take over entirely autonomously!
+<sub>The hosted demo on Cloud Run has been shut down. Everything below runs locally.</sub>
 
 ---
 
-## 💻 Developer Setup & Self-Hosting
+## Pipeline
 
-If you want to run the orbital orchestration engine locally on your own machine instead of using the live SaaS:
+```
+GitLab MR opened ──▶ POST /webhook (secret checked, 200 returned at once)
+                          │
+                          ▼  orchestrator runs six agents in order;
+                             if one fails, the rest still run
+ 1  Context Engine    pulls the diff, wiki pages and issues; indexes them for retrieval
+ 2  Security Auditor  ┌ regex scan            (instant, deterministic)
+                      ├ Claude audit          ┐
+                      ├ Gemini audit          ├ in parallel
+                      ├ OSV dependency lookup ┘
+                      └ judge pass: merge duplicates, label who found what
+ 3  Docs Guardian     finds docs the change invalidates; updates the wiki and changelog
+ 4  Risk Scorer       weighted score 0–100 → approve / review / block
+ 5  Green Sentinel    estimates the CI runs saved by catching issues early
+ 6  Action Agent      posts the summary comment and fix suggestions, applies a label,
+                      sends the email brief
+```
 
-### Prerequisites
-- Node.js 20+
-- GitLab account with admin access to a project
-- Anthropic API key & Gemini API key
-- Resend API key (for email)
+## Design decisions
 
-### Local Quick Start
+**Two independent auditors, one judge.** Claude (`claude-sonnet-4-6`) and Gemini (`gemini-2.5-flash`) review the same diff without seeing each other's output. A third pass, Claude acting as the judge, merges the findings. Nothing gets dropped: each finding is tagged with who found it, and that tag sets its confidence:
+
+| Found by | Confidence |
+| :-- | :-- |
+| Both models | 0.95–1.0 |
+| Regex scanner | 1.0 |
+| One model only | 0.7–0.85 |
+
+So a reviewer sees what the models agree on first, and single-model findings are still there, ranked lower. In security, a missed real issue costs more than a false alarm, so the judge is told to organise, not filter. If the judge fails or returns nothing, the code falls back to a plain merge, so no findings are lost.
+
+**Deterministic checks alongside the models.**
+- A regex layer catches the obvious cases (hard-coded secrets, `eval`, SQL built by string concatenation) instantly and for free.
+- Dependency versions found in the diff are checked against the [OSV](https://osv.dev) vulnerability database.
+
+These run in parallel with the model calls. Each layer has its own fallback, so one slow or failing provider doesn't fail the review.
+
+**Risk is a formula, not a model.** The score adds fixed weights from [`src/config/default.json`](src/config/default.json): critical finding +25, high +10, no tests +15, large changeset +10, core files touched +10, author history up to +20.
+- Below 30, the merge request is labelled `flux:cleared`.
+- 70 and above, it's labelled `flux:blocked`.
+- Anything in between goes to `flux:review-required`.
+
+Keeping this step deterministic makes the verdict explainable.
+
+**Answer the webhook fast, work in the background.** GitLab expects a quick response. The webhook returns immediately, and the six agents run afterwards.
+
+**Multi-tenant.** Each user connects their own GitLab token. The orchestrator runs every review inside that user's context, so the GitLab calls act as them.
+
+**Honest about estimates.** Green Sentinel counts each critical or high finding as one failed CI run avoided. Each run is assumed to be 6 minutes, at 0.4 g CO₂ per minute. These are configurable estimates, not measurements.
+
+## Run it locally
 
 ```bash
-# 1. Clone and install
-git clone https://github.com/kanaktronics/fluxsentinel-ai
-cd fluxsentinel-ai
 npm install
-
-# 2. Configure environment
-cp .env.example .env
-
-# 🚨 IMPORTANT: To receive automated Executive Brief emails, you MUST configure:
-# RESEND_API_KEY=your_key
-# TEAM_LEAD_EMAIL=your_actual_email@domain.com (Mandatory)
-# Edit the rest of .env with your Gitlab/Anthropic/Gemini secrets
-
-# 3. Start development server (Auto-provisions secure Ngrok tunnel)
-npm run dev
-# Note: Trigger a test MR and check your inbox to verify Resend email delivery!
+cp .env.example .env          # GitLab token, Anthropic and Gemini keys, JWT secret
+npm run dev                   # http://localhost:3000
 ```
 
-### Deploy Your Own Enterprise Cloud Run Instance
-The project is structurally designed for Google Cloud Run (2nd Gen) Firebase deployments.
+To receive real GitLab webhooks on your machine, install [ngrok](https://ngrok.com/download) and set `NGROK_AUTHTOKEN`. The server opens a tunnel at startup and shows the webhook URL in the setup wizard at `/setup`.
+
+Check that every route responds:
 
 ```bash
-# 1. Login to Google Cloud / Firebase
-firebase login
-
-# 2. Deploy the multi-tenant architecture
-firebase deploy --only functions
+node scripts/smoke-test.js http://localhost:3000
 ```
 
-## Environment Variables
+Full GitLab setup steps are in [SETUP.md](SETUP.md). For self-hosting, `Dockerfile` and `deploy.sh` target Google Cloud Run.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GITLAB_TOKEN` | ✅ | GitLab Personal Access Token (api scope) |
-| `GITLAB_WEBHOOK_SECRET` | ✅ | Secret for validating webhook payloads |
-| `ANTHROPIC_API_KEY` | ✅ | Anthropic API key for Claude claude-sonnet-4-6 |
-| `RESEND_API_KEY` | ✅ | Resend API key for email |
-| `JWT_SECRET` | ✅ | 32+ char secret for dashboard JWT tokens |
-| `DASHBOARD_USERNAME` | ✅ | Dashboard login username |
-| `DASHBOARD_PASSWORD` | ✅ | Dashboard login password |
-| `TEAM_LEAD_EMAIL` | ✅ | Recipients for executive email brief |
-| `GITLAB_API_URL` | ❌ | GitLab API URL (default: https://gitlab.com/api/v4) |
-| `PORT` | ❌ | Server port (default: 3000) |
-| `FROM_EMAIL` | ❌ | Sender email address |
+## Layout
 
-## API Endpoints
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `POST` | `/webhook` | Webhook Secret | Receives GitLab MR webhook events |
-| `POST` | `/auth/login` | None | Issues dashboard JWT token |
-| `GET` | `/dashboard` | JWT | Main dashboard UI |
-| `GET` | `/login` | None | Login page |
-| `GET` | `/green` | None | Public green metrics page |
-| `GET` | `/api/metrics` | JWT | Aggregate dashboard statistics |
-| `GET` | `/api/runs` | JWT | List of all MR analysis runs |
-| `GET` | `/api/runs/:id` | JWT | Single run details |
-| `GET` | `/api/green` | None | Green metrics (public) |
-| `GET` | `/api/config` | JWT | Current agent configuration |
-| `PUT` | `/api/config` | JWT | Update agent configuration |
-
-## Test the Webhook Locally
-
-```bash
-# Start the server
-npm run dev
-
-# In another terminal, simulate a GitLab webhook:
-curl -X POST http://localhost:3000/webhook \
-  -H "Content-Type: application/json" \
-  -H "X-Gitlab-Token: your_webhook_secret" \
-  -H "X-Gitlab-Event: Merge Request Hook" \
-  -d '{
-    "object_attributes": {
-      "iid": 1,
-      "action": "open",
-      "title": "Add user authentication",
-      "description": "Closes #5",
-      "source_branch": "feature/auth",
-      "target_branch": "main",
-      "author_id": 123
-    },
-    "project": { "id": 456, "name": "test-project" },
-    "user": { "name": "Dev User" }
-  }'
-
-# Expected response: HTTP 202 Accepted
-# Then watch your terminal — all 6 agents fire sequentially
+```
+src/webhook.js        Express app: webhook, auth, dashboard, API
+src/orchestrator.js   runs the six agents for one merge request
+src/agents/           context, security, docs, risk, green, action
+src/tools/            Claude, Gemini, GitLab, OSV, vector store, email, judge
+src/dashboard/        setup wizard and run dashboard (static)
 ```
 
-## What Judges Will See
+Stack: Node.js 20, Express, Anthropic and Gemini APIs, GitLab REST API, Vectra (local vector index), Firebase, Resend, Docker on Cloud Run.
 
-1. **Login page** at `/login` — dark gradient, FluxSentinel branding
-2. **Dashboard** at `/dashboard` — 4 metric cards + recent MR table, live data
-3. **Green page** at `/green` — public shareable CO₂ impact chart
-4. **GitLab MR** — structured dashboard comment with all agent results table
-5. **Inline suggestions** — one-click fix buttons for security findings
-6. **Auto-updated Wiki** — documentation corrected without human intervention
-7. **Email brief** — HTML email in team lead's inbox
+## Limits
 
-## Architecture Highlights
+- Retrieval uses a local TF-IDF vector instead of learned embeddings, so matching is lexical, not semantic.
+- Fix suggestions are posted as ordinary merge request comments, not inline suggestions on the diff. Inline suggestions need exact diff positions that the pipeline doesn't track yet.
 
-- **Adversarial AI Consensus**: Rather than trusting one LLM, we pit **Claude 3.7 Sonnet** against **Gemini 2.0 Flash**. If Gemini calls out an SQL injection, Claude is prompted to cross-examine the claim. If they reach consensus, it's flagged. Zero false-positives.
-- **Real RAG**: Vectra vector store with cosine similarity (not just huge context window stuffing)
-- **One-Click Fixes**: GitLab suggestion comments applied via the Gitlab UI in one click
-- **Multi-Tenant SaaS Security**: Firestore queries are securely walled-off by `userId`. Passwords are encrypted with `bcrypt 12-rounds` and Gitlab keys are ferried seamlessly via Node `AsyncLocalStorage`.
-- **Stateless Cloud Run Resiliency**: We use Google Cloud Run with `firebase-functions/v2`, allowing dynamic horizontal auto-scaling without ever dropping an AI workflow.
-
-## Demo Video
-
-[📹 Watch Demo on YouTube](https://youtu.be/YQyuyM2b5IA)
-
-## License
-
-MIT © 2026 FluxSentinel AI Team
+MIT licensed.
